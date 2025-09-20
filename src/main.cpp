@@ -5,13 +5,40 @@
 
 // put function declarations here:
 int i = 0;
-void printHex(uint16_t x);
+void read_all_pin_values();
 
-PCF8575 PCF(0x20);
+//PCF8575 PCF(0x20);
+PCF8575 pcf8575(0x20);
+
 
 
 void setup() {
   Serial.begin(115200);
+  
+  // setup pinmods
+  // Port 1
+  pcf8575.pinMode(P0, INPUT);
+  pcf8575.pinMode(P1, INPUT);
+  pcf8575.pinMode(P2, INPUT);
+  pcf8575.pinMode(P3, OUTPUT);
+  // Port 2
+  pcf8575.pinMode(P4, INPUT);
+  pcf8575.pinMode(P5, INPUT);
+  pcf8575.pinMode(P6, INPUT);
+  pcf8575.pinMode(P7, OUTPUT);
+  // Port 3
+  pcf8575.pinMode(P8, INPUT);
+  pcf8575.pinMode(P9, INPUT);
+  pcf8575.pinMode(P10, INPUT);
+  pcf8575.pinMode(P11, OUTPUT);
+  // Port 4
+  pcf8575.pinMode(P12, INPUT);
+  pcf8575.pinMode(P13, INPUT);
+  pcf8575.pinMode(P14, INPUT);
+  pcf8575.pinMode(P15, OUTPUT);
+
+  pcf8575.begin();
+
   //Serial.swap();
   
   //Wire.begin();
@@ -19,26 +46,26 @@ void setup() {
   // Serial.print("Scanning address range 0x03-0x77\n\n");
 
 
-  PCF.begin();
+  // PCF.begin();
 
-  Serial.println(__FILE__);
-  Serial.print("PCF8575_LIB_VERSION:\t");
-  Serial.println(PCF8575_LIB_VERSION);
+  // Serial.println(__FILE__);
+  // Serial.print("PCF8575_LIB_VERSION:\t");
+  // Serial.println(PCF8575_LIB_VERSION);
 
-  if (!PCF.begin())
-  {
-    Serial.println("could not initialize...");
-  }
-  if (!PCF.isConnected())
-  {
-    Serial.println("=> not connected");
-  }
-  else
-  {
-    Serial.println("=> connected!!");
-    PCF.selectNone();
-    //PCF.select(7);
-  }
+  // if (!PCF.begin())
+  // {
+  //   Serial.println("could not initialize...");
+  // }
+  // if (!PCF.isConnected())
+  // {
+  //   Serial.println("=> not connected");
+  // }
+  // else
+  // {
+  //   Serial.println("=> connected!!");
+  //   PCF.selectNone();
+  //   //PCF.select(7);
+  // }
 
 
   
@@ -49,88 +76,42 @@ int selector = 0;
 
 void loop() {
 
-  // i2cdetect();  // default range from 0x03 to 0x77
-  // delay(2000);
-  // uint16_t x = PCF.read16();
-  // printHex(x);
-
   if (Serial.available() > 0){
     c = Serial.read();
 
-    // if (c == '1'){
-    //   PCF8575::DigitalInput di = PCF.digitalReadAll();
-    //   Serial.print("READ VALUE FROM PCF P1: ");
-    //   Serial.print(di.p0);
-    //   Serial.print(" - ");
-    //   Serial.print(di.p1);
-    //   Serial.print(" - ");
-    //   Serial.print(di.p2);
-    //   Serial.print(" - ");
-    //   Serial.print(di.p3);
-    //   Serial.print(" - ");
-    //   Serial.print(di.p4);
-    //   Serial.print(" - ");
-    //   Serial.print(di.p5);
-    //   Serial.print(" - ");
-    //   Serial.print(di.p6);
-    //   Serial.print(" - ");
-    //   Serial.println(di.p7);
-    // }
-
     if (c == '1'){
-      int16_t x = PCF.read16();
-      printHex(x);
+
+      pcf8575.digitalWrite(P3,HIGH);
+      delay(200);
+      pcf8575.digitalWrite(P3,LOW);
+      delay(200);
+      
     }
     if (c == '2'){
-      PCF.toggle(6);
-      delay(10);
-      PCF.toggle(6);
+
+      pcf8575.digitalWrite(P7,HIGH);
+      delay(200);
+      pcf8575.digitalWrite(P7,LOW);
+      delay(200);
     }
     if (c == '3'){
-      int16_t x = PCF.read16();
-      printHex(x);
-      Serial.print("Toggle pin:");
-      Serial.println(7, DEC);
 
-      PCF.select(0x0070);
-      delay(50);
-      PCF.selectN(0x0070);
-      delay(50);
+      pcf8575.digitalWrite(P11,HIGH);
+      delay(200);
+      pcf8575.digitalWrite(P11,LOW);
+      delay(200);
+
     }
     if (c == '4'){
-      int16_t x = PCF.read16();
-      printHex(x);
-      Serial.print("Toggle pin:");
-      Serial.println(selector, DEC);
-
-      PCF.select(selector);
-      delay(10);
-      PCF.selectN(selector);
-
-      selector++;
+      pcf8575.digitalWrite(P15,HIGH);
+      delay(200);
+      pcf8575.digitalWrite(P15,LOW);
+      delay(200);
     }
-    if (c == '5'){
-      int16_t x = PCF.read16();
-      printHex(x);
-      Serial.print("Toggle pin:");
-      Serial.println(7, DEC);
-
-      PCF.selectN(0x0070);
-      delay(50);
-      PCF.select(0x0070);
-      delay(50);
-    }
-    if (c == '6'){
-      selector = 0;
-    }
-    if (c == '7'){
-      PCF.select(0x0070);
-    }
-    if (c == '8'){
-      PCF.selectN(0x0070);
-    }
+    
     if (c == '9'){
-      PCF.toggleMask(0x0070);
+      // PCF.toggleMask(0x0070);
+      read_all_pin_values();
     }
 
 
@@ -143,12 +124,39 @@ void loop() {
   //delay(1000);
 }
 
-
-
-void printHex(uint16_t x)
-{
-  if (x < 0x1000) Serial.print('0');
-  if (x < 0x100)  Serial.print('0');
-  if (x < 0x10)   Serial.print('0');
-  Serial.println(x, HEX);
+void read_all_pin_values(){
+  PCF8575::DigitalInput di = pcf8575.digitalReadAll();
+  Serial.print(di.p15);
+  Serial.print(" - ");
+  Serial.print(di.p14);
+  Serial.print(" - ");
+  Serial.print(di.p13);
+  Serial.print(" - ");
+  Serial.print(di.p12);
+  Serial.print(" - ");
+  Serial.print(di.p11);
+  Serial.print(" - ");
+  Serial.print(di.p10);
+  Serial.print(" - ");
+  Serial.print(di.p9);
+  Serial.print(" - ");
+  Serial.print(di.p8);
+  Serial.print(" - ");
+  Serial.print(di.p7);
+  Serial.print(" - ");
+  Serial.print(di.p6);
+  Serial.print(" - ");
+  Serial.print(di.p5);
+  Serial.print(" - ");
+  Serial.print(di.p4);
+  Serial.print(" - ");
+  Serial.print(di.p3);
+  Serial.print(" - ");
+  Serial.print(di.p2);
+  Serial.print(" - ");
+  Serial.print(di.p1);
+  Serial.print(" - ");
+  Serial.println(di.p0);
 }
+
+

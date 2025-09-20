@@ -30,3 +30,39 @@
 *.exe
 *.out
 *.app
+
+# PlatformIO build files
+.pio/
+.piolibdeps/
+.pioenvs/
+.piolib/
+.pio_build/
+
+# VSCode settings
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Backup / temporary files
+*~
+*.bak
+*.swp

@@ -81,56 +81,23 @@ Each number corresponds to the state of pins P15 down to P0.
 
 ---
 
-## 📐 System Diagram (GitHub‑compatible Mermaid)
-
-> GitHub renders Mermaid fenced code blocks. Use **`graph TD`** for maximum compatibility.
+## 📐 System Diagram (GitHub‑friendly)
 
 ```mermaid
-graph TD
-  %% Control Layer
-  ESP[ESP8266 / WeMos D1 Mini]
-  PCF[PCF8575 (I²C → 16 I/O)]
-  ESP -- I²C --> PCF
+flowchart LR
+    ESP[ESP8266 / WeMos D1 Mini] -->|I²C| PCF[PCF8575 I²C → 16 I/O]
 
-  %% HDMI Switch Boards
-  SW1[HDMI Switch #1\n3-in → 1-out]
-  SW2[HDMI Switch #2\n3-in → 1-out]
-  SW3[HDMI Switch #3\n3-in → 1-out]
-  SW4[HDMI Switch #4\n3-in → 1-out]
+    PCF --> SW1[HDMI Switch #1 3-in → 1-out]
+    PCF --> SW2[HDMI Switch #2 3-in → 1-out]
+    PCF --> SW3[HDMI Switch #3 3-in → 1-out]
+    PCF --> SW4[HDMI Switch #4 3-in → 1-out]
 
-  %% Wiring
-  PCF ---|BTN/LED wires| SW1
-  PCF ---|BTN/LED wires| SW2
-  PCF ---|BTN/LED wires| SW3
-  PCF ---|BTN/LED wires| SW4
-
-  %% Network Interfaces
-  MQTT[(MQTT Broker)]
-  HTTP[HTTP REST]
-  HA[Home Assistant]
-
-  ESP -. Wi‑Fi .-> MQTT
-  ESP -. Wi‑Fi .-> HTTP
-  ESP -. Wi‑Fi .-> HA
+    ESP -->|WiFi| MQTT[(MQTT broker)]
+    ESP -->|WiFi| HTTP[REST API]
+    ESP -->|WiFi| HA[Home Assistant]
 ```
 
-### ASCII Fallback (if Mermaid is disabled)
-
-```
-+------------------------------+         +-------------------+
-| ESP8266 (WeMos D1 Mini)      |  I2C    |  PCF8575          |
-|  Wi‑Fi + logic + APIs        +---------+  16x GPIO (I²C)   |
-+------------------------------+         +---------+---------+
-                                                   |
-                             BTN/LED wires to 4x HDMI 3-in/1-out switches
-                                                   |
-      +-----------------+  +-----------------+  +-----------------+  +-----------------+
-      | HDMI Switch #1  |  | HDMI Switch #2  |  | HDMI Switch #3  |  | HDMI Switch #4  |
-      | 3-in → 1-out    |  | 3-in → 1-out    |  | 3-in → 1-out    |  | 3-in → 1-out    |
-      +-----------------+  +-----------------+  +-----------------+  +-----------------+
-
-Wi‑Fi → MQTT / HTTP / Home Assistant
-```
+This format is directly compatible with GitHub’s **Mermaid diagram rendering**.
 
 ---
 

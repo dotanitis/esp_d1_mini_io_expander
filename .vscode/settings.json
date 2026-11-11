@@ -1,0 +1,9 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "stty": true,
+    "timeout": true,
+    "pio": true,
+    "~/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-addr2line": true
+  },
+  "idf.currentSetup": "/home/elsec-rt-algo-1/build/.espressif/release-v5.5/esp-idf"
+}

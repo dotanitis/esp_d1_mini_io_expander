@@ -126,3 +126,38 @@ This format is directly compatible with GitHub’s **Mermaid diagram rendering**
 ## 📄 License
 
 Open‑source under MIT License. Feel free to adapt and improve!
+
+---
+
+## 🩺 Stability and Crash Diagnostics
+
+### Observed problem
+
+After weeks of uptime the board enters a reset loop. Serial output on `/dev/ttyUSB1` (115200 baud) showed WiFi and MQTT connecting, then `Exception (0)` (illegal instruction) with `epc1=0x40223dc1`. Decoding with `xtensa-lx106-elf-addr2line` against the build ELF gave:
+
+* `udp_input` (lwIP `udp.c`) called from `ip4_input`, `ethernet_input`, `ppPeocessRxPktHdr` (WiFi RX path).
+* `mem_malloc` (lwIP `mem.c`) also on the stack.
+
+The crash is in the network stack while handling an incoming packet, which points to heap exhaustion or corruption that builds up over time, not to application logic.
+
+### Changes made
+
+* **Non-blocking MQTT reconnect**: no more `delay(5000)` loops. Reconnect is retried every 5 s from `loop()` and only when WiFi is connected, so the WiFi stack keeps being serviced.
+* **Health monitoring**: every 60 s the firmware prints and publishes free heap, largest free block, fragmentation, RSSI and uptime to `home/office/hdmi-kvm/health`. A steadily falling heap indicates a leak.
+* **Reset reason**: `ESP.getResetInfo()` is printed at boot.
+* **Self-recovery**: restarts cleanly if free heap < 6000 B or largest free block < 3000 B.
+* **Scheduled restart**: restarts after 7 days of uptime as a stopgap against slow leaks.
+* **Build**: `platform = espressif8266@^4.2.1` (newer Arduino core and lwIP fixes), `-D PIO_FRAMEWORK_ARDUINO_LWIP2_HIGHER_BANDWIDTH`, debug build type and `esp8266_exception_decoder` monitor filter so crashes are decoded live in `pio device monitor`.
+
+### Reading a crash
+
+1. Run `pio device monitor -p /dev/ttyUSB1` (the exception decoder filter is enabled).
+2. Or paste the stack dump into the Arduino ESP Exception Decoder, or run:
+   `~/.platformio/packages/toolchain-xtensa/bin/xtensa-lx106-elf-addr2line -pfiC -e .pio/build/d1_mini_pro/firmware.elf <addresses>`
+   The ELF must come from the same source that is flashed.
+
+### Further ideas if resets persist
+
+* Watch the `health` topic for a heap trend over days.
+* Check for a weak or brown-out 5 V supply (resets with `rst cause:4` or `1`).
+* Check for WiFi AP instability or reconnect storms (RSSI in the health payload).
